@@ -19,6 +19,7 @@
                 <outlet property="focusMapBtn" destination="FOG-9k-vPx" id="6qt-jF-7j0"/>
                 <outlet property="initiateAutopilotBtn" destination="9Vf-35-vbV" id="Izk-Fg-dAB"/>
                 <outlet property="loadWaypointsBtn" destination="DgB-aA-6iP" id="GPe-ao-tXz"/>
+                <outlet property="nextBtn" destination="bOB-vH-i9j" id="ofL-Si-hxz"/>
                 <outlet property="startBtn" destination="k2j-Ze-OI2" id="Bfg-Fj-wow"/>
                 <outlet property="stopBtn" destination="A9l-OA-cof" id="7ax-zY-EB1"/>
                 <outlet property="view" destination="i5M-Pr-FkT" id="sfx-zR-JGt"/>
@@ -26,7 +27,7 @@
         </placeholder>
         <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
         <view clearsContextBeforeDrawing="NO" contentMode="scaleToFill" id="i5M-Pr-FkT">
-            <rect key="frame" x="0.0" y="0.0" width="128" height="316"/>
+            <rect key="frame" x="0.0" y="0.0" width="265" height="248"/>
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
             <subviews>
                 <button hidden="YES" opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="370-h9-FcK" userLabel="back">
@@ -110,7 +111,7 @@
                     </connections>
                 </button>
                 <button hidden="YES" opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="9Vf-35-vbV" userLabel="stop">
-                    <rect key="frame" x="8" y="279" width="112" height="30"/>
+                    <rect key="frame" x="112" y="52" width="137" height="30"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                     <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="0.59999999999999998" colorSpace="custom" customColorSpace="sRGB"/>
                     <color key="tintColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
@@ -120,20 +121,30 @@
                     </connections>
                 </button>
                 <button hidden="YES" opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="DgB-aA-6iP" userLabel="stop">
-                    <rect key="frame" x="10" y="241" width="109" height="30"/>
+                    <rect key="frame" x="112" y="13" width="137" height="30"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                     <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="0.59999999999999998" colorSpace="custom" customColorSpace="sRGB"/>
                     <color key="tintColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                    <state key="normal" title="Load Waypoints"/>
+                    <state key="normal" title="Add More"/>
                     <connections>
                         <action selector="loadWaypointsBtnAction:" destination="-1" eventType="touchUpInside" id="u2u-Ha-XtH"/>
+                    </connections>
+                </button>
+                <button hidden="YES" opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="bOB-vH-i9j" userLabel="stop">
+                    <rect key="frame" x="112" y="90" width="137" height="30"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                    <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="0.59999999999999998" colorSpace="custom" customColorSpace="sRGB"/>
+                    <color key="tintColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                    <state key="normal" title="MissionState"/>
+                    <connections>
+                        <action selector="nextBtnAction:" destination="-1" eventType="touchUpInside" id="cAE-PL-ZeD"/>
                     </connections>
                 </button>
             </subviews>
             <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="0.0" colorSpace="custom" customColorSpace="sRGB"/>
             <nil key="simulatedStatusBarMetrics"/>
             <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
-            <point key="canvasLocation" x="-21" y="81"/>
+            <point key="canvasLocation" x="104.5" y="46"/>
         </view>
     </objects>
 </document>

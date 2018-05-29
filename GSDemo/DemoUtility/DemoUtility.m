@@ -9,10 +9,12 @@
 #import "DemoUtility.h"
 #import <DJISDK/DJISDK.h>
 
-inline void ShowMessage(NSString *title, NSString *message, id target, NSString *cancleBtnTitle)
+inline void ShowMessage(NSString *title, NSString *message, NSString *state, id target, NSString *cancleBtnTitle)
 {
+    NSString *finalMessage = [NSString stringWithFormat:@"%@%@", message, state];
     dispatch_async(dispatch_get_main_queue(), ^{
-        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:title message:message delegate:target cancelButtonTitle:cancleBtnTitle otherButtonTitles:nil];
+        
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:title message:finalMessage delegate:target cancelButtonTitle:cancleBtnTitle otherButtonTitles:nil];
         [alert show];
     });
 }

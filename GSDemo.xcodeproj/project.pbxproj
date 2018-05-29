@@ -23,7 +23,7 @@
 		A4E86B831B4A374300F204DA /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A4E86B821B4A374300F204DA /* Images.xcassets */; };
 		A4E86B861B4A374300F204DA /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = A4E86B841B4A374300F204DA /* LaunchScreen.xib */; };
 		A4F9574C1B4ADD570017733D /* MapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A4F9574B1B4ADD570017733D /* MapKit.framework */; };
-		BCE3052720B5AF8A00C9423F /* 1.json in Resources */ = {isa = PBXBuildFile; fileRef = BCE3052620B5AF8A00C9423F /* 1.json */; };
+		BCE3052920B5F44400C9423F /* 1.json in Resources */ = {isa = PBXBuildFile; fileRef = BCE3052820B5F44400C9423F /* 1.json */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -57,7 +57,7 @@
 		A4E86B901B4A374300F204DA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A4E86B911B4A374300F204DA /* GSDemoTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = GSDemoTests.m; sourceTree = "<group>"; };
 		A4F9574B1B4ADD570017733D /* MapKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MapKit.framework; path = System/Library/Frameworks/MapKit.framework; sourceTree = SDKROOT; };
-		BCE3052620B5AF8A00C9423F /* 1.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = 1.json; path = ../../json_coordinates/1.json; sourceTree = "<group>"; };
+		BCE3052820B5F44400C9423F /* 1.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = 1.json; path = ../../../json_coordinates/1.json; sourceTree = "<group>"; };
 		BD01B4A59AB3761414068C5E /* libPods-GSDemo.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-GSDemo.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		D28B91E9DC596A93C22AC0F1 /* Pods-GSDemo.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-GSDemo.debug.xcconfig"; path = "Pods/Target Support Files/Pods-GSDemo/Pods-GSDemo.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -96,7 +96,7 @@
 		A4E86B691B4A374300F204DA = {
 			isa = PBXGroup;
 			children = (
-				BCE3052620B5AF8A00C9423F /* 1.json */,
+				BCE3052820B5F44400C9423F /* 1.json */,
 				A4E86B741B4A374300F204DA /* GSDemo */,
 				A4E86B9B1B4A56C600F204DA /* Frameworks */,
 				A4E86B8E1B4A374300F204DA /* GSDemoTests */,
@@ -244,7 +244,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BCE3052720B5AF8A00C9423F /* 1.json in Resources */,
+				BCE3052920B5F44400C9423F /* 1.json in Resources */,
 				A4E86B811B4A374300F204DA /* Main.storyboard in Resources */,
 				A4507F2C1CB506D40037861C /* DJIWaypointConfigViewController.xib in Resources */,
 				A4E86B861B4A374300F204DA /* LaunchScreen.xib in Resources */,

@@ -16,7 +16,7 @@
 
 #endif
 
-extern void ShowMessage(NSString *title, NSString *message, id target, NSString *cancleBtnTitle);
+extern void ShowMessage(NSString *title, NSString *message, NSString *state, id target, NSString *cancleBtnTitle);
 
 @class DJIFlightController;
 

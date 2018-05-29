@@ -37,7 +37,8 @@
     [_addBtn setHidden:(mode == DJIGSViewMode_ViewMode)];
     [_configBtn setHidden:(mode == DJIGSViewMode_ViewMode)];
     [_initiateAutopilotBtn setHidden:(mode == DJIGSViewMode_ViewMode)];
-    [_loadWaypointsBtn setHidden:(mode == DJIGSViewMode_ViewMode)];
+    [_addMoreBtn setHidden:(mode == DJIGSViewMode_ViewMode)];
+    [_missionStateBtn setHidden:(mode == DJIGSViewMode_ViewMode)];
 }
 
 #pragma mark - IBAction Methods
@@ -110,10 +111,17 @@
     }
 }
 
-- (IBAction)loadWaypointsBtnAction:(id)sender {
+- (IBAction)addMoreBtnAction:(id)sender {
     
-    if ([_delegate respondsToSelector:@selector(loadWaypointsBtnActionInGSButtonVC:)]) {
-        [_delegate loadWaypointsBtnActionInGSButtonVC:self];
+    if ([_delegate respondsToSelector:@selector(addMoreBtnActionInGSButtonVC:)]) {
+        [_delegate addMoreBtnActionInGSButtonVC:self];
+    }
+}
+
+- (IBAction)missionStateBtnAction:(id)sender {
+    
+    if ([_delegate respondsToSelector:@selector(missionStateBtnActionInGSButtonVC:)]) {
+        [_delegate missionStateBtnActionInGSButtonVC:self];
     }
 }
 

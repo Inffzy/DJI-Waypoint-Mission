@@ -24,8 +24,9 @@ typedef NS_ENUM(NSUInteger, DJIGSViewMode) {
 - (void)addBtn:(UIButton *)button withActionInGSButtonVC:(DJIGSButtonViewController *)GSBtnVC;
 - (void)configBtnActionInGSButtonVC:(DJIGSButtonViewController *)GSBtnVC;
 - (void)initiateAutopilotBtnActionInGSButtonVC:(DJIGSButtonViewController *)GSBtnVC;
-- (void)loadWaypointsBtnActionInGSButtonVC:(DJIGSButtonViewController *)GSBtnVC;
+- (void)addMoreBtnActionInGSButtonVC:(DJIGSButtonViewController *)GSBtnVC;
 - (void)switchToMode:(DJIGSViewMode)mode inGSButtonVC:(DJIGSButtonViewController *)GSBtnVC;
+- (void)missionStateBtnActionInGSButtonVC:(DJIGSButtonViewController *)GSBtnVC;
 
 @end
 
@@ -40,7 +41,8 @@ typedef NS_ENUM(NSUInteger, DJIGSViewMode) {
 @property (weak, nonatomic) IBOutlet UIButton *addBtn;
 @property (weak, nonatomic) IBOutlet UIButton *configBtn;
 @property (weak, nonatomic) IBOutlet UIButton *initiateAutopilotBtn;
-@property (weak, nonatomic) IBOutlet UIButton *loadWaypointsBtn;
+@property (weak, nonatomic) IBOutlet UIButton *addMoreBtn;
+@property (weak, nonatomic) IBOutlet UIButton *missionStateBtn;
 
 @property (assign, nonatomic) DJIGSViewMode mode;
 @property (weak, nonatomic) id <DJIGSButtonViewControllerDelegate> delegate;
@@ -54,6 +56,7 @@ typedef NS_ENUM(NSUInteger, DJIGSViewMode) {
 - (IBAction)addBtnAction:(id)sender;
 - (IBAction)configBtnAction:(id)sender;
 - (IBAction)initiateAutopilotBtnAction:(id)sender;
-- (IBAction)loadWaypointsBtnAction: (id)sender;
+- (IBAction)addMoreBtnAction: (id)sender;
+- (IBAction)missionStateBtnAction:(id)sender;
 
 @end
