@@ -16,11 +16,14 @@
 #import "DemoUtility.h"
 
 #define ENTER_DEBUG_MODE 0
-#define MAX_FLIGHT_SPEED 12
-#define AUTO_FLIGHT_SPEED 10
-
+#define MAX_FLIGHT_SPEED 15
+#define AUTO_FLIGHT_SPEED 12
 
 @interface DJIRootViewController ()<DJIGSButtonViewControllerDelegate, DJIWaypointConfigViewControllerDelegate, MKMapViewDelegate, CLLocationManagerDelegate, DJISDKManagerDelegate, DJIFlightControllerDelegate>
+{
+    NSNumber *missionProgress;
+    NSMutableArray *allCoordinates;
+}
 
 @property (nonatomic, assign) BOOL isEditingPoints;
 @property (nonatomic, strong) DJIGSButtonViewController *gsButtonVC;
@@ -31,6 +34,7 @@
 @property(nonatomic, assign) CLLocationCoordinate2D userLocation;
 @property(nonatomic, assign) CLLocationCoordinate2D droneLocation;
 @property(nonatomic, strong) UITapGestureRecognizer *tapGesture;
+@property (strong, nonatomic) NSMutableArray *editPoints;
 
 @property (weak, nonatomic) IBOutlet MKMapView *mapView;
 @property (weak, nonatomic) IBOutlet UIView *topBarView;
@@ -142,10 +146,10 @@
         DJIFlightController* flightController = [DemoUtility fetchFlightController];
         if (flightController) {
             flightController.delegate = self;
-            ShowMessage(@"Product Connected", nil, @"", nil, @"OK");
+            ShowMessage(@"Product Connected", @"", @"", nil, @"OK");
         }
     }else{
-        ShowMessage(@"Product disconnected", nil, @"", nil, @"OK");
+        ShowMessage(@"Product disconnected", @"", @"", nil, @"OK");
     }
     
     //If this demo is used in China, it's required to login to your DJI account to activate the application. Also you need to use DJI Go app to bind the aircraft to your DJI account. For more details, please check this demo's tutorial.
@@ -199,10 +203,27 @@
 - (void)addWaypoints:(UITapGestureRecognizer *)tapGesture
 {
     CGPoint point = [tapGesture locationInView:self.mapView];
-    if(tapGesture.  state == UIGestureRecognizerStateEnded){
+    if (tapGesture.  state == UIGestureRecognizerStateEnded)
+    {
 
-        if (self.isEditingPoints){
-            [self.mapController addPoint:point withMapView:self.mapView];
+        if (self.isEditingPoints)
+        {
+            CLLocationCoordinate2D coordinate = [_mapView convertPoint:point toCoordinateFromView:_mapView];
+            CLLocation *location = [[CLLocation alloc] initWithLatitude:coordinate.latitude longitude:coordinate.longitude];
+            [_editPoints addObject:location];
+            MKPointAnnotation* annotation = [[MKPointAnnotation alloc] init];
+            annotation.coordinate = location.coordinate;
+            [_mapView addAnnotation:annotation];
+            
+            NSMutableArray <NSNumber *> *newCoordinate;
+            
+            NSNumber *latitude = [NSNumber numberWithDouble: coordinate.latitude];
+            NSNumber *longitude = [NSNumber numberWithDouble: coordinate.longitude];
+            
+            [newCoordinate addObject: latitude];
+            [newCoordinate addObject: longitude];
+            
+            [allCoordinates addObject: newCoordinate];
         }
     }
 }
@@ -240,7 +261,6 @@
         DJIWaypoint* waypoint = [self.waypointMission waypointAtIndex:i];
         waypoint.altitude = [self.waypointConfigVC.altitudeTextField.text floatValue];
     }
-    
     self.waypointMission.maxFlightSpeed = [self.waypointConfigVC.maxFlightSpeedTextField.text floatValue];
     self.waypointMission.autoFlightSpeed = [self.waypointConfigVC.autoFlightSpeedTextField.text floatValue];
     self.waypointMission.headingMode = (DJIWaypointMissionHeadingMode)self.waypointConfigVC.headingSegmentedControl.selectedSegmentIndex;
@@ -360,6 +380,44 @@
     }
 }
 
+- (void)uploadAndExecuteMission
+/**
+Adapted the answer of Ken Thomases from <https://stackoverflow.com/questions/50534982/objective-c-sequentially-executing-two-completion-blocks/50536092?noredirect=1#comment88094948_50536092>
+**/
+{
+    [[self missionOperator] uploadMissionWithCompletion:^(NSError * _Nullable error) {
+        if (error)
+        {
+            ShowMessage(@"Upload Mission failed", error.description, @"", nil, @"OK");
+        }
+        else
+        {
+            ShowMessage(@"Upload Mission Started", @"", @"", nil, @"OK");
+            
+            [[self missionOperator] addListenerToUploadEvent:self withQueue:nil andBlock:^(DJIWaypointMissionUploadEvent *event)
+            {
+                if (event.currentState == DJIWaypointMissionStateReadyToExecute)
+                {
+                    [[self missionOperator] startMissionWithCompletion:^(NSError * _Nullable error) {
+                        if (error)
+                        {
+                            ShowMessage(@"Start Mission Failed", error.description, @"", nil, @"OK");
+                        }
+                        else
+                        {
+                            ShowMessage(@"Mission Started", @"", @"", nil, @"OK");
+                        }
+                    }];
+                }
+                else if (event.error)
+                {
+                    ShowMessage(@"Upload Mission failed", event.error.description, @"", nil, @"OK");
+                }
+            }];
+        }
+    }];
+}
+
 - (void)initiateAutopilotBtnActionInGSButtonVC:(DJIGSButtonViewController *)GSBtnVC
 {
     //Load coordinates.
@@ -374,25 +432,38 @@
      
     //Convert to waypoints.
     self.waypointMission = [[DJIMutableWaypointMission alloc] init];
-    NSMutableArray* wayPoints = self.mapController.wayPoints;
     
-    for (int i = 0; i < coordinates.count; i++) {
-        float latitude = [coordinates[i][0] floatValue];
-        float longitude = [coordinates[i][1] floatValue];
+    for (int i = 0; i < coordinates.count; i++)
+    {
+        double latitude = [coordinates[i][0] floatValue];
+        double longitude = [coordinates[i][1] floatValue];
         CLLocationCoordinate2D currentCoordinate = CLLocationCoordinate2DMake(latitude, longitude);
-        CGPoint currentPoint = [_mapView convertCoordinate:currentCoordinate toPointToView:self.mapView];
-        [self.mapController addPoint:currentPoint withMapView:self.mapView];
+        CLLocation *location = [[CLLocation alloc] initWithLatitude:currentCoordinate.latitude longitude:currentCoordinate.longitude];
+        [_editPoints addObject:location];
+        MKPointAnnotation* annotation = [[MKPointAnnotation alloc] init];
+        annotation.coordinate = location.coordinate;
+        [_mapView addAnnotation:annotation];
         
-        CLLocation* location = [wayPoints objectAtIndex:i];
+        NSMutableArray <NSNumber *> *newCoordinate;
         
-        if (CLLocationCoordinate2DIsValid(location.coordinate)) {
+        NSNumber *currentLatitude = [NSNumber numberWithDouble: currentCoordinate.latitude];
+        NSNumber *currentLongitude = [NSNumber numberWithDouble: currentCoordinate.longitude];
+        
+        [newCoordinate addObject: currentLatitude];
+        [newCoordinate addObject: currentLongitude];
+        
+        [allCoordinates addObject: newCoordinate];
+        
+        if (CLLocationCoordinate2DIsValid(location.coordinate))
+        {
             DJIWaypoint* waypoint = [[DJIWaypoint alloc] initWithCoordinate:location.coordinate];
             [self.waypointMission addWaypoint:waypoint];
         }
     }
     
     //Configure mission.
-    for (int i = 0; i < self.waypointMission.waypointCount; i++) {
+    for (int i = 0; i < self.waypointMission.waypointCount; i++)
+    {
         DJIWaypoint* waypoint = [self.waypointMission waypointAtIndex:i];
         waypoint.altitude = 30.0; //[coordinates[i][2] floatValue];
     }
@@ -407,101 +478,182 @@
     
     WeakRef(target);
     
-    [[self missionOperator] addListenerToFinished:self withQueue:dispatch_get_main_queue() andBlock:^(NSError * _Nullable error) {
-        
+    [[self missionOperator] addListenerToExecutionEvent:self withQueue:nil andBlock:^(DJIWaypointMissionExecutionEvent *event)
+     {
+         self->missionProgress = [NSNumber numberWithInteger: event.progress.targetWaypointIndex];;
+     }];
+    
+    [[self missionOperator] addListenerToFinished:self withQueue:dispatch_get_main_queue() andBlock:^(NSError * _Nullable error)
+    {
         WeakReturn(target);
         
-        if (error) {
+        if (error)
+        {
             [target showAlertViewWithTitle:@"Mission Execution Failed" withMessage:[NSString stringWithFormat:@"%@", error.description]];
         }
-        else {
+        else
+        {
             [target showAlertViewWithTitle:@"Mission Execution Finished" withMessage:nil];
         }
     }];
     
     //Upload and execute mission.
-    [[self missionOperator] uploadMissionWithCompletion:^(NSError * _Nullable error) {
-        if (error)
-        {
-            ShowMessage(@"Upload Mission failed", error.description, @"", nil, @"OK");
-        }
-        else
-        {
-            ShowMessage(@"Upload Mission Started", @"", @"", nil, @"OK");
-            
-            [[self missionOperator] addListenerToUploadEvent:self
-                                                   withQueue:nil
-                                                    andBlock:^(DJIWaypointMissionUploadEvent *event){
-                                                        if (event.currentState == DJIWaypointMissionStateReadyToExecute)
-                                                        {
-                                                            [[self missionOperator] startMissionWithCompletion:^(NSError * _Nullable error) {
-                                                                if (error)
-                                                                {
-                                                                    ShowMessage(@"Start Mission Failed", error.description, @"", nil, @"OK");
-                                                                }
-                                                                else
-                                                                {
-                                                                    ShowMessage(@"Mission Started", @"", @"", nil, @"OK");
-                                                                }
-                                                            }];
-                                                        }
-                                                        else if (event.error)
-                                                        {
-                                                            ShowMessage(@"Upload Mission failed", event.error.description, @"", nil, @"OK");
-                                                        }
-                                                    }];
-        }
-    }];
+    [self uploadAndExecuteMission];
 }
 
-- (void)missionStateActionInGSButtonVC:(DJIGSButtonViewController *)GSBtnVC
+- (void)missionStateBtnActionInGSButtonVC:(DJIGSButtonViewController *)GSBtnVC
 {
     NSString *state = [NSString stringWithFormat: @"%ld", (long)[[self missionOperator] currentState]];
     ShowMessage(@"Current State", @"", state, nil, @"OK");
 }
 
-
 - (void)addMoreBtnActionInGSButtonVC:(DJIGSButtonViewController *)GSBtnVC
 {
+    NSInteger indexInt = [self->missionProgress integerValue];
+    NSString *indexString = [self->missionProgress stringValue];
+    ShowMessage(indexString, @"", @"", nil, @"OK");
+    
+    NSArray<DJIWaypoint *> *originalWaypoints = self.waypointMission.allWaypoints;
+    
+    NSArray<NSNumber *> *newCoordinate1 = @[@38.869510, @-77.320230];
+    NSArray<NSNumber *> *newCoordinate2 = @[@38.871879, @-77.318242];
+    NSArray<NSNumber *> *newCoordinate3 = @[@38.870711, @-77.319091];
+    
+    NSMutableArray *newCoordinates = [[NSMutableArray alloc] init];
+    
+    [newCoordinates addObject: newCoordinate1];
+    [newCoordinates addObject: newCoordinate2];
+    [newCoordinates addObject: newCoordinate3];
+    
     /*
+    NSArray<DJIWaypoint *> *currentWaypoints = self.waypointMission.allWaypoints;
+    
     NSError *error = nil;
+    
     NSBundle *bundle = [NSBundle mainBundle];
-    NSString *filePath = [bundle pathForResource:@"1.json" ofType:nil];
+    NSString *filePath = [bundle pathForResource:@"2.json" ofType:nil];
     NSData *data = [NSData dataWithContentsOfFile:filePath options:NSDataReadingMappedIfSafe error:&error];
     
     NSDictionary *JSONObject = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingAllowFragments error:&error];
-    NSArray *coordinates = [JSONObject objectForKey:@"coordinates"];
-    
-    for (int i = 0; i < coordinates.count; i++) {
-        float latitude = [coordinates[i][0] floatValue];
-        float longitude = [coordinates[i][1] floatValue];
-        CLLocationCoordinate2D currentCoordinate = CLLocationCoordinate2DMake(latitude, longitude);
-        CGPoint currentPoint = [_mapView convertCoordinate:currentCoordinate toPointToView:self.mapView];
-        [self.mapController addPoint:currentPoint withMapView:self.mapView];
+    NSMutableArray *newCoordinates = [JSONObject objectForKey:@"coordinates"];
+    */
+  
+    int state = [[self missionOperator] currentState];
+    if (state == 6)
+    {
+        [[self missionOperator] stopMissionWithCompletion:^(NSError * _Nullable error)
+         {
+             if (error)
+             {
+                 //NSString* failedMessage = [NSString stringWithFormat:@"Stop Mission Failed: %@", error.description];
+                 //ShowMessage(@"", failedMessage, @"", nil, @"OK");
+                 ;
+             }
+             
+             else
+             {
+                 ;
+             }
+         }];
+        
+        [[self missionOperator] addListenerToExecutionEvent:self withQueue:nil andBlock:^(DJIWaypointMissionExecutionEvent *event)
+         {
+             if (event.currentState == DJIWaypointMissionStateReadyToUpload)
+             {
+                 if (indexInt < originalWaypoints.count)
+                 {
+                     for (NSInteger i = originalWaypoints.count - 1; i >= indexInt; i--)
+                     {
+                         NSNumber *waypointlatitude = [NSNumber numberWithDouble: originalWaypoints[i].coordinate.latitude];
+                         NSNumber *waypointLongitude = [NSNumber numberWithDouble: originalWaypoints[i].coordinate.longitude];
+                         NSMutableArray <NSNumber *> *coordinate = [[NSMutableArray alloc] init];
+                         [coordinate addObject: waypointlatitude];
+                         [coordinate addObject: waypointLongitude];
+                         [newCoordinates insertObject:coordinate atIndex:0];
+                     }
+                 }
+                 
+                 else if (indexInt > originalWaypoints.count)
+                 {
+                     for (NSInteger i = 0; i < indexInt - originalWaypoints.count; i++)
+                     {
+                         [newCoordinates removeObjectAtIndex: i];
+                     }
+                 }
+                 
+                 else
+                 {
+                     ;
+                 }
+                 
+                 [self.waypointMission removeAllWaypoints];
+                 //[self.mapController cleanAllPointsWithMapView:self.mapView];
+                 //self.waypointMission = [[DJIMutableWaypointMission alloc] init];
+                 
+                 for (int i = 0; i < newCoordinates.count; i++)
+                 {
+                     double latitude = [newCoordinates[i][0] floatValue];
+                     double longitude = [newCoordinates[i][1] floatValue];
+                     CLLocationCoordinate2D currentCoordinate = CLLocationCoordinate2DMake(latitude, longitude);
+                     CLLocation *location = [[CLLocation alloc] initWithLatitude:currentCoordinate.latitude longitude:currentCoordinate.longitude];
+                     
+                     [self->_editPoints addObject:location];
+                     MKPointAnnotation* annotation = [[MKPointAnnotation alloc] init];
+                     annotation.coordinate = location.coordinate;
+                     [self->_mapView addAnnotation:annotation];
+                     
+                     NSMutableArray <NSNumber *> *newCoordinate;
+                     
+                     NSNumber *currentLatitude = [NSNumber numberWithDouble: currentCoordinate.latitude];
+                     NSNumber *currentLongitude = [NSNumber numberWithDouble: currentCoordinate.longitude];
+                     
+                     [newCoordinate addObject: currentLatitude];
+                     [newCoordinate addObject: currentLongitude];
+                     
+                     [self->allCoordinates addObject: newCoordinate];
+                     
+                     if (CLLocationCoordinate2DIsValid(location.coordinate))
+                     {
+                         DJIWaypoint* waypoint = [[DJIWaypoint alloc] initWithCoordinate:location.coordinate];
+                         [self.waypointMission addWaypoint:waypoint];
+                     }
+                 }
+                 
+                 //Configure mission.
+                 for (int i = 0; i < self.waypointMission.waypointCount; i++)
+                 {
+                     DJIWaypoint* waypoint = [self.waypointMission waypointAtIndex:i];
+                     waypoint.altitude = 30.0; //[coordinates[i][2] floatValue];
+                 }
+                 
+                 self.waypointMission.maxFlightSpeed = MAX_FLIGHT_SPEED;
+                 self.waypointMission.autoFlightSpeed = AUTO_FLIGHT_SPEED;
+                 
+                 self.waypointMission.headingMode = 0;
+                 [self.waypointMission setFinishedAction: 1];
+                 
+                 [[self missionOperator] loadMission:self.waypointMission];
+                 
+                 WeakRef(target);
+                 
+                 [[self missionOperator] addListenerToFinished:self withQueue:dispatch_get_main_queue() andBlock:^(NSError * _Nullable error)
+                  {
+                      WeakReturn(target);
+                      
+                      if (error)
+                      {
+                          [target showAlertViewWithTitle:@"Mission Execution Failed" withMessage:[NSString stringWithFormat:@"%@", error.description]];
+                      }
+                      else
+                      {
+                          [target showAlertViewWithTitle:@"Mission Execution Finished" withMessage:nil];
+                      }
+                  }];
+                 
+                 [self uploadAndExecuteMission];
+             }
+         }];
     }
-    
-
-     CFRunLoopRef runloop = CFRunLoopGetCurrent();
-     NSURLSession* session = [NSURLSession sessionWithConfiguration:[NSURLSessionConfiguration defaultSessionConfiguration]];
-     NSURLSessionDataTask *dataTask = [session dataTaskWithURL:[NSURL URLWithString:@"https://gist.githubusercontent.com/Inffzy/dd8a6810e6a387cc95323f8af996a963/raw/3740669b3160bb864d799b251a9b5c0cbcab141e/Json%2520url"] completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
-     
-     NSDictionary *JSONObject = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingAllowFragments error:nil];
-     
-     NSArray *coordinates = [JSONObject objectForKey:@"coordinates"];
-     
-     for (int i = 0; i < coordinates.count; i++) {
-     float latitude = [coordinates[i][0] floatValue];
-     float longitude = [coordinates[i][1] floatValue];
-     CLLocationCoordinate2D currentCoordinate = CLLocationCoordinate2DMake(latitude, longitude);
-         CGPoint currentPoint = [self->_mapView convertCoordinate:currentCoordinate toPointToView:self.mapView];
-     [self.mapController addPoint:currentPoint withMapView:self.mapView];
-     }
-     CFRunLoopStop(runloop);
-     }];
-     
-     [dataTask resume];
-     CFRunLoopRun();
-     */
 }
 
 #pragma mark - CLLocationManagerDelegate
@@ -509,23 +661,40 @@
 {
     CLLocation* location = [locations lastObject];
     self.userLocation = location.coordinate;
+    
+    for (int i = 0; i < allCoordinates.count - 1; i++)
+    {
+        CLLocationCoordinate2D coordinate1 = CLLocationCoordinate2DMake([allCoordinates[i][0] doubleValue], [allCoordinates[i][1] doubleValue]);
+        CLLocationCoordinate2D coordinate2 = CLLocationCoordinate2DMake([allCoordinates[i+1][0] doubleValue], [allCoordinates[i+1][1] doubleValue]);
+        
+        MKMapPoint * pointsArray = malloc(sizeof(CLLocationCoordinate2D)*2);
+        
+        pointsArray[0]= MKMapPointForCoordinate(coordinate1);
+        pointsArray[1]= MKMapPointForCoordinate(coordinate2);
+        
+        MKPolyline *  routeLine = [MKPolyline polylineWithPoints:pointsArray count:2];
+        free(pointsArray);
+        
+        [self.mapView addOverlay:routeLine];
+    }
 }
 
 #pragma mark MKMapViewDelegate Method
 - (MKAnnotationView *)mapView:(MKMapView *)mapView viewForAnnotation:(id <MKAnnotation>)annotation
 {
-    if ([annotation isKindOfClass:[MKPointAnnotation class]]) {
+    if ([annotation isKindOfClass:[MKPointAnnotation class]])
+    {
         MKPinAnnotationView* pinView = [[MKPinAnnotationView alloc] initWithAnnotation:annotation reuseIdentifier:@"Pin_Annotation"];
         pinView.pinTintColor = [UIColor purpleColor];
         return pinView;
-        
-    }else if ([annotation isKindOfClass:[DJIAircraftAnnotation class]])
+    }
+    
+    else if ([annotation isKindOfClass:[DJIAircraftAnnotation class]])
     {
         DJIAircraftAnnotationView* annoView = [[DJIAircraftAnnotationView alloc] initWithAnnotation:annotation reuseIdentifier:@"Aircraft_Annotation"];
         ((DJIAircraftAnnotation*)annotation).annotationView = annoView;
         return annoView;
     }
-    
     return nil;
 }
 

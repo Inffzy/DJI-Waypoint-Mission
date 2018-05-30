@@ -12,14 +12,14 @@
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="DJIGSButtonViewController">
             <connections>
                 <outlet property="addBtn" destination="lSR-Lj-eLh" id="v4H-CP-LJx"/>
+                <outlet property="addMoreBtn" destination="DgB-aA-6iP" id="e3W-eq-wqH"/>
                 <outlet property="backBtn" destination="370-h9-FcK" id="uA0-OE-MWh"/>
                 <outlet property="clearBtn" destination="0sF-Ja-1FL" id="jvY-a6-5PB"/>
                 <outlet property="configBtn" destination="aiQ-ud-2ld" id="jsc-ba-OHB"/>
                 <outlet property="editBtn" destination="k0D-Bh-d3b" id="Cgx-5R-z7i"/>
                 <outlet property="focusMapBtn" destination="FOG-9k-vPx" id="6qt-jF-7j0"/>
                 <outlet property="initiateAutopilotBtn" destination="9Vf-35-vbV" id="Izk-Fg-dAB"/>
-                <outlet property="loadWaypointsBtn" destination="DgB-aA-6iP" id="GPe-ao-tXz"/>
-                <outlet property="nextBtn" destination="bOB-vH-i9j" id="ofL-Si-hxz"/>
+                <outlet property="missionStateBtn" destination="bOB-vH-i9j" id="S8l-uJ-gJO"/>
                 <outlet property="startBtn" destination="k2j-Ze-OI2" id="Bfg-Fj-wow"/>
                 <outlet property="stopBtn" destination="A9l-OA-cof" id="7ax-zY-EB1"/>
                 <outlet property="view" destination="i5M-Pr-FkT" id="sfx-zR-JGt"/>
@@ -127,7 +127,7 @@
                     <color key="tintColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                     <state key="normal" title="Add More"/>
                     <connections>
-                        <action selector="loadWaypointsBtnAction:" destination="-1" eventType="touchUpInside" id="u2u-Ha-XtH"/>
+                        <action selector="addMoreBtnAction:" destination="-1" eventType="touchUpInside" id="zui-1Z-94Z"/>
                     </connections>
                 </button>
                 <button hidden="YES" opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="bOB-vH-i9j" userLabel="stop">
@@ -137,7 +137,7 @@
                     <color key="tintColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                     <state key="normal" title="MissionState"/>
                     <connections>
-                        <action selector="nextBtnAction:" destination="-1" eventType="touchUpInside" id="cAE-PL-ZeD"/>
+                        <action selector="missionStateBtnAction:" destination="-1" eventType="touchUpInside" id="8fO-HQ-S43"/>
                     </connections>
                 </button>
             </subviews>
